@@ -436,6 +436,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
           roomId,
           message._id,
           result.data.id,
+          result.data.model,
           result.data.detail?.usage as UsageResponse)
       }
     }
