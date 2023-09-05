@@ -61,6 +61,18 @@ export async function updateChat(chatId: string, response: string, messageId: st
 }
 
 export async function insertChatUsage(userId: ObjectId, roomId: number, chatId: ObjectId, messageId: string, model: string, usage: UsageResponse) {
+  const modelPrice = {
+    'gpt-3.5-turbo': { prompt: 0.0015 / 1000, completion: 0.002 / 1000 },
+    'gpt-3.5-turbo-16k': { prompt: 0.003 / 1000, completion: 0.004 / 1000 },
+    'gpt-4': { prompt: 0.03 / 1000, completion: 0.06 / 1000 },
+    'gpt-4-32k': { prompt: 0.06 / 1000, completion: 0.12 / 1000 },
+  };
+  //multiply modelPrice to usage.prompt_tokens and usage.completion_tokens according to model
+  if (usage) {
+    usage.prompt_tokens = usage.prompt_tokens * modelPrice[model].prompt
+    usage.completion_tokens = usage.completion_tokens * modelPrice[model].completion
+    usage.total_tokens = usage.prompt_tokens + usage.completion_tokens
+  }
   const chatUsage = new ChatUsage(userId, roomId, chatId, messageId, model, usage)
   await usageCol.insertOne(chatUsage)
   return chatUsage
